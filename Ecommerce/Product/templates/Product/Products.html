@@ -279,6 +279,34 @@
             </div>
         </div>
         <!-- Brand End -->
-        
-
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+var update=document.getElementsByClassName('UpdateCart');
+for(i=0;i<update.length;i++){
+    update[i].addEventListener('click',function(){
+        var action=this.dataset.action;
+        var productid=this.dataset.productid;
+        addtocart(action,productid);
+    })
+}
+function addtocart(action,productid){
+     $.ajax({
+        url: "{% url 'Shop:UpdateCart' %}",
+        data: {
+          'action':action,
+          'productid':productid
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.status) {
+            document.getElementById('cart_count').innerHTML=data.cart_count;
+          }
+          else{
+            alert(data.message);
+          }
+        }
+      });
+}
+</script>
 {% endblock %}

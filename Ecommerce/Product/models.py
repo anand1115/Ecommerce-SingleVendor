@@ -1,6 +1,7 @@
 from django.db import models
 from .utils import slug_generator
 from django.urls import reverse
+from Accounts.models import User
 
 
 
@@ -70,6 +71,23 @@ class ProductImages(models.Model):
 		except:
 			url=""
 		return url
+
+
+
+class WishListProduct(models.Model):
+	user=models.ForeignKey(User,on_delete=models.CASCADE)
+	product=models.ForeignKey(Product,on_delete=models.CASCADE)
+	quantity=models.PositiveSmallIntegerField()
+	active=models.BooleanField(default=True)
+
+	def __str__(self):
+		return str(self.user)+" "+str(self.product)
+
+	def save(self,*args,**kwargs):
+		if(self.quantity<0):
+			self.quantity=1
+		super().save(*args,**kwargs)
+
 
 
 	

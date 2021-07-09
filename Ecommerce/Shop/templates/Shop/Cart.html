@@ -31,96 +31,28 @@
                                             </tr>
                                         </thead>
                                         <tbody class="align-middle">
+
+                                        {% for item in cart.get_items %}
+
                                             <tr>
                                                 <td>
                                                     <div class="img">
-                                                        <a href="#"><img src="img/product-1.jpg" alt="Image"></a>
-                                                        <p>Product Name</p>
+                                                        <a href="#"><img src="{{item.product.image_url}}" alt="Image"></a>
+                                                        <p>{{item.product.title|capfirst}}</p>
                                                     </div>
                                                 </td>
-                                                <td>$99</td>
+                                                <td>Rs {{item.product.selling_price}}</td>
                                                 <td>
                                                     <div class="qty">
-                                                        <button class="btn-minus"><i class="fa fa-minus"></i></button>
-                                                        <input type="text" value="1">
-                                                        <button class="btn-plus"><i class="fa fa-plus"></i></button>
+                                                        <button class="UpdateCart btn-minus" data-productid="{{item.product.id}}" data-action="decrement"><i class="fa fa-minus"></i></button>
+                                                        <input type="text" value="{{item.quantity}}">
+                                                        <button class="UpdateCart btn-plus" data-productid="{{item.product.id}}" data-action="increment"><i class="fa fa-plus"></i></button>
                                                     </div>
                                                 </td>
-                                                <td>$99</td>
-                                                <td><button><i class="fa fa-trash"></i></button></td>
+                                                <td>Rs {{item.item_selling_price}}</td>
+                                                <td><button><i class="UpdateCart fa fa-trash" data-productid="{{item.product.id}}" data-action="remove"></i></button></td>
                                             </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="img">
-                                                        <a href="#"><img src="img/product-2.jpg" alt="Image"></a>
-                                                        <p>Product Name</p>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td>
-                                                    <div class="qty">
-                                                        <button class="btn-minus"><i class="fa fa-minus"></i></button>
-                                                        <input type="text" value="1">
-                                                        <button class="btn-plus"><i class="fa fa-plus"></i></button>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td><button><i class="fa fa-trash"></i></button></td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="img">
-                                                        <a href="#"><img src="img/product-3.jpg" alt="Image"></a>
-                                                        <p>Product Name</p>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td>
-                                                    <div class="qty">
-                                                        <button class="btn-minus"><i class="fa fa-minus"></i></button>
-                                                        <input type="text" value="1">
-                                                        <button class="btn-plus"><i class="fa fa-plus"></i></button>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td><button><i class="fa fa-trash"></i></button></td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="img">
-                                                        <a href="#"><img src="img/product-4.jpg" alt="Image"></a>
-                                                        <p>Product Name</p>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td>
-                                                    <div class="qty">
-                                                        <button class="btn-minus"><i class="fa fa-minus"></i></button>
-                                                        <input type="text" value="1">
-                                                        <button class="btn-plus"><i class="fa fa-plus"></i></button>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td><button><i class="fa fa-trash"></i></button></td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="img">
-                                                        <a href="#"><img src="img/product-5.jpg" alt="Image"></a>
-                                                        <p>Product Name</p>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td>
-                                                    <div class="qty">
-                                                        <button class="btn-minus"><i class="fa fa-minus"></i></button>
-                                                        <input type="text" value="1">
-                                                        <button class="btn-plus"><i class="fa fa-plus"></i></button>
-                                                    </div>
-                                                </td>
-                                                <td>$99</td>
-                                                <td><button><i class="fa fa-trash"></i></button></td>
-                                            </tr>
+                                        {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -139,9 +71,9 @@
                                         <div class="cart-summary">
                                             <div class="cart-content">
                                                 <h1>Cart Summary</h1>
-                                                <p>Sub Total<span>$99</span></p>
-                                                <p>Shipping Cost<span>$1</span></p>
-                                                <h2>Grand Total<span>$100</span></h2>
+                                                <p>Sub Total<span>Rs {{cart.get_order.total_selling_price}}</span></p>
+                                                <p>Shipping Cost<span>Free</span></p>
+                                                <h2>Grand Total<span>Rs {{cart.get_order.total_selling_price}}</span></h2>
                                             </div>
                                             <div class="cart-btn">
                                                 <button>Update Cart</button>
@@ -156,4 +88,36 @@
                 </div>
             </div>
             <!-- Cart End -->
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+var update=document.getElementsByClassName('UpdateCart');
+for(i=0;i<update.length;i++){
+    update[i].addEventListener('click',function(){
+        var action=this.dataset.action;
+        var productid=this.dataset.productid;
+        addtocart(action,productid);
+    })
+}
+function addtocart(action,productid){
+     $.ajax({
+        url: "{% url 'Shop:UpdateCart' %}",
+        data: {
+          'action':action,
+          'productid':productid
+        },
+        dataType: 'json',
+        success: function (data) {
+          if (data.status) {
+            document.getElementById('cart_count').innerHTML=data.cart_count;
+            location.reload();
+          }
+          else{
+            alert(data.message);
+          }
+        }
+      });
+}
+</script>
 {% endblock %}
